@@ -33,8 +33,10 @@ func CommandWithDirectory(
 
 	// This whole conditional needs to be cleaned up
 	if strings[1] == "log" {
-		first_date := fmt.Sprintf("%s %s %s", strings[4], strings[5], strings[6])
-		second_date := fmt.Sprintf("%s %s %s", strings[8], strings[9], strings[10])
+		first_date := fmt.Sprintf("%s %s %s",
+			strings[4], strings[5], strings[6])
+		second_date := fmt.Sprintf("%s %s %s",
+			strings[8], strings[9], strings[10])
 		flags := make([]string, 0, 8)
 		flags = append(flags, strings[1])
 		flags = append(flags, strings[2])
@@ -205,12 +207,14 @@ func Usage() error {
 		logger.Printf("Usage (Println 2): %s", err.Error())
 		return err
 	}
-	_, err = fmt.Println("-When to start looking at commits, as interpreted by git log's --since")
+	_, err = fmt.Println(
+		"-When to start looking at commits, as interpreted by git log's --since")
 	if err != nil {
 		logger.Printf("Usage (Println 3): %s", err.Error())
 		return err
 	}
-	_, err = fmt.Println("-When to stop looking at commits, as interpreted by git log's --until")
+	_, err = fmt.Println(
+		"-When to stop looking at commits, as interpreted by git log's --until")
 	if err != nil {
 		logger.Printf("Usage (Println 4): %s", err.Error())
 		return err
@@ -229,7 +233,9 @@ func SplitNewLinePlatformPortable(str string) []string {
 	return strings.Split(strings.ReplaceAll(str, "\r\n", "\n"), "\n")
 }
 
-func SortedKeysOfMapWithStringKeys[K constraints.Ordered, V any](the_map map[K]V) []K {
+func SortedKeysOfMapWithStringKeys[K constraints.Ordered, V any](
+	the_map map[K]V,
+) []K {
 	sorted_keys := make([]K, 0, len(the_map))
 	for key := range the_map {
 		sorted_keys = append(sorted_keys, key)
@@ -238,7 +244,9 @@ func SortedKeysOfMapWithStringKeys[K constraints.Ordered, V any](the_map map[K]V
 	return sorted_keys
 }
 
-func StringSliceOfMapsKeysAndValues[K constraints.Ordered, V any](the_map map[K]V) []string {
+func StringSliceOfMapsKeysAndValues[K constraints.Ordered, V any](
+	the_map map[K]V,
+) []string {
 	sorted_keys := SortedKeysOfMapWithStringKeys(the_map)
 	slice := make([]string, 0, len(the_map))
 	for _, key := range sorted_keys {
