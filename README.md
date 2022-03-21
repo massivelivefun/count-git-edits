@@ -1,6 +1,6 @@
 # count-git-edits
 
-Quick and dirty Go binary to count the number of line additions/subtractions per contributor.
+A quick and dirty Go binary to count the number of line additions/subtractions per contributor.
 Considers all remote branches, not just `main` or `master`.
 Considers each contributer to be a unique name/email combination.
 
