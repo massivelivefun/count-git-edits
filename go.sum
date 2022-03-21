@@ -2,3 +2,5 @@ github.com/peterrk/slices v0.0.0-20220310082748-85e38376ee49 h1:J2TMMR3qsP609ZfV
 github.com/peterrk/slices v0.0.0-20220310082748-85e38376ee49/go.mod h1:zYMG3gd8L9Rf7KDA1x0YwsfZN6a4oozh3nzT9pNiOd8=
 golang.org/x/exp v0.0.0-20220318154914-8dddf5d87bd8 h1:s/+U+w0teGzcoH2mdIlFQ6KfVKGaYpgyGdUefZrn9TU=
 golang.org/x/exp v0.0.0-20220318154914-8dddf5d87bd8/go.mod h1:lgLbSvA5ygNOMpwM/9anMpWVlVJ7Z+cHWq/eFuinpGE=
+golang.org/x/exp v0.0.0-20220321173239-a90fa8a75705 h1:ba9YlqfDGTTQ5aZ2fwOoQ1hf32QySyQkR6ODGDzHlnE=
+golang.org/x/exp v0.0.0-20220321173239-a90fa8a75705/go.mod h1:lgLbSvA5ygNOMpwM/9anMpWVlVJ7Z+cHWq/eFuinpGE=
