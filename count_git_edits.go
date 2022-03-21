@@ -193,11 +193,30 @@ func CountEdits(
 	return student_counts, nil
 }
 
-func Usage() {
-	fmt.Println("Takes the following params:")
-	fmt.Println("-Directory containing repository")
-	fmt.Println("-When to start looking at commits, as interpreted by git log's --since")
-	fmt.Println("-When to stop looking at commits, as interpreted by git log's --until")
+func Usage() error {
+	var err error = nil
+	_, err = fmt.Println("Takes the following params:")
+	if err != nil {
+		logger.Printf("Usage (Println 1): %s", err.Error())
+		return err
+	}
+	_, err = fmt.Println("-Directory containing repository")
+
+	if err != nil {
+		logger.Printf("Usage (Println 2): %s", err.Error())
+		return err
+	}
+	_, err = fmt.Println("-When to start looking at commits, as interpreted by git log's --since")
+	if err != nil {
+		logger.Printf("Usage (Println 3): %s", err.Error())
+		return err
+	}
+	_, err = fmt.Println("-When to stop looking at commits, as interpreted by git log's --until")
+	if err != nil {
+		logger.Printf("Usage (Println 4): %s", err.Error())
+		return err
+	}
+	return nil
 }
 
 // Replace this with the map[string]int key asap because students can have
@@ -235,7 +254,11 @@ var logger = log.New(os.Stderr, "", 1)
 
 func main() {
 	if len(os.Args) != 4 {
-		Usage()
+		err := Usage()
+		if err != nil {
+			logger.Printf("main (Usage): %s", err.Error())
+			os.Exit(1)
+		}
 	} else {
 		counts_map, err := CountEdits(os.Args[1], os.Args[2], os.Args[3])
 		if err != nil {
