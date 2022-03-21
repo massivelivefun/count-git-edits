@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"log"
 	"os"
 	"os/exec"
 	"regexp"
@@ -18,8 +19,7 @@ func CommandWithDirectory(
 ) (string, error) {
 	err := os.Chdir(directory)
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "CommandWithDirectory (Chdir):%s",
-			err.Error())
+		logger.Printf("CommandWithDirectory (Chdir):%s", err.Error())
 		return "", err
 	}
 
@@ -27,8 +27,7 @@ func CommandWithDirectory(
 	strings := strings.Fields(command)
 	if len(strings) <= 1 {
 		err := fmt.Errorf("Command parameter needs arguments passed with it.")
-		fmt.Fprintf(os.Stderr, "CommandWithDirectory (Fields): %s",
-			err.Error())
+		logger.Printf("CommandWithDirectory (Fields): %s", err.Error())
 		return "", err
 	}
 
@@ -48,8 +47,7 @@ func CommandWithDirectory(
 		cmd := exec.Command(strings[0], flags...)
 		output, err := cmd.Output()
 		if err != nil {
-			fmt.Fprintf(os.Stderr, "CommandWithDirectory (Output 1): %s",
-				err.Error())
+			logger.Printf("CommandWithDirectory (Output 1): %s", err.Error())
 			return "", err
 		}
 		return string(output), nil
@@ -57,8 +55,7 @@ func CommandWithDirectory(
 		cmd := exec.Command(strings[0], strings[1:]...)
 		output, err := cmd.Output()
 		if err != nil {
-			fmt.Fprintf(os.Stderr, "CommandWithDirectory (Output 2): %s",
-				err.Error())
+			logger.Printf("CommandWithDirectory (Output 2): %s", err.Error())
 			return "", err
 		}
 		return string(output), nil
@@ -69,13 +66,12 @@ func ListBranches(directory string) ([]string, error) {
 	output, err := CommandWithDirectory(directory,
 		"git ls-remote --heads origin")
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "ListBranches (CommandWithDirectory): %s",
-			err.Error())
+		logger.Printf("ListBranches (CommandWithDirectory): %s", err.Error())
 		return nil, err
 	}
 	regex, err := regexp.Compile("^[0-9a-f]+\\s*refs/heads/(.*)$")
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "ListBranches (Compile): %s", err.Error())
+		logger.Printf("ListBranches (Compile): %s", err.Error())
 		return nil, err
 	}
 	new_output := SplitNewLinePlatformPortable(output)
@@ -101,8 +97,8 @@ func ContributorCountBranch(
 	_, err := CommandWithDirectory(directory, fmt.Sprintf("git checkout %s",
 		branch))
 	if err != nil {
-		fmt.Fprintf(os.Stderr,
-			"ContributorCountBranch (CommandWithDirectory 1): %s", err.Error())
+		logger.Printf("ContributorCountBranch (CommandWithDirectory 1): %s",
+			err.Error())
 		return err
 	}
 
@@ -112,8 +108,8 @@ func ContributorCountBranch(
 	command += " --format=COMMIT,%ae,%an --numstat"
 	output, err := CommandWithDirectory(directory, command)
 	if err != nil {
-		fmt.Fprintf(os.Stderr,
-			"ContributorCountBranch (CommandWithDirectory 2): %s", err.Error())
+		logger.Printf("ContributorCountBranch (CommandWithDirectory 2): %s",
+			err.Error())
 		return err
 	}
 
@@ -124,15 +120,13 @@ func ContributorCountBranch(
 
 	first_regex, err := regexp.Compile("^COMMIT,([^,]*),([^,]*)*$")
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "ContributorCountBranch (Compile 1): %s",
-			err.Error())
+		logger.Printf("ContributorCountBranch (Compile 1): %s", err.Error())
 		return err
 	}
 
 	second_regex, err := regexp.Compile("^\\s*(\\d+)\\s*(\\d+).*$")
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "ContributorCountBranch (Compile 2): %s",
-			err.Error())
+		logger.Printf("ContributorCountBranch (Compile 2): %s", err.Error())
 		return err
 	}
 
@@ -148,13 +142,13 @@ func ContributorCountBranch(
 		} else if second_regex.MatchString(new_line) && len(second_group_matches) > 2 {
 			added, err := strconv.Atoi(second_group_matches[1])
 			if err != nil {
-				fmt.Fprintf(os.Stderr, "ContributorCountBranch (Atoi 1): %s",
+				logger.Printf("ContributorCountBranch (Atoi 1): %s",
 					err.Error())
 				return err
 			}
 			deleted, err := strconv.Atoi(second_group_matches[2])
 			if err != nil {
-				fmt.Fprintf(os.Stderr, "ContributorCountBranch (Atoi 2): %s",
+				logger.Printf("ContributorCountBranch (Atoi 2): %s",
 					err.Error())
 				return err
 			}
@@ -178,13 +172,12 @@ func CountEdits(
 ) (map[string]int, error) {
 	_, err := CommandWithDirectory(directory, "git pull")
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "CountEdits (CommandWithDirectory): %s",
-			err.Error())
+		logger.Printf("CountEdits (CommandWithDirectory): %s", err.Error())
 		return nil, err
 	}
 	branches, err := ListBranches(directory)
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "CountEdits (ListBranches): %s", err.Error())
+		logger.Printf("CountEdits (ListBranches): %s", err.Error())
 		return nil, err
 	}
 	student_counts := make(map[string]int)
@@ -192,7 +185,7 @@ func CountEdits(
 		err := ContributorCountBranch(directory, branch, start_time, end_time,
 			student_counts)
 		if err != nil {
-			fmt.Fprintf(os.Stderr,
+			logger.Printf(
 				"CountEdits (ContributorCountBranch) %d: %s", idx, err.Error())
 			return nil, err
 		}
@@ -238,13 +231,15 @@ func StringSliceOfMapsKeysAndValues[K constraints.Ordered, V any](the_map map[K]
 	return slice
 }
 
+var logger = log.New(os.Stderr, "", 1)
+
 func main() {
 	if len(os.Args) != 4 {
 		Usage()
 	} else {
 		counts_map, err := CountEdits(os.Args[1], os.Args[2], os.Args[3])
 		if err != nil {
-			fmt.Fprintf(os.Stderr, "main (CountEdits): %s", err.Error())
+			logger.Printf("main (CountEdits): %s", err.Error())
 			os.Exit(1)
 		}
 		slice_of_students_edits := StringSliceOfMapsKeysAndValues(counts_map)
