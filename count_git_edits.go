@@ -33,19 +33,22 @@ func CommandWithDirectory(
 
 	// This whole conditional needs to be cleaned up
 	if strings[1] == "log" {
-		first_date := fmt.Sprintf("%s %s %s",
-			strings[4], strings[5], strings[6])
-		second_date := fmt.Sprintf("%s %s %s",
-			strings[8], strings[9], strings[10])
+		// Can't really build the arguments and assume that its always dates
+		// Especially when the date could be something like "Today"
+		// first_date := fmt.Sprintf("%s %s %s",
+		// 	strings[4], strings[5], strings[6])
+		// second_date := fmt.Sprintf("%s %s %s",
+		// 	strings[8], strings[9], strings[10])
+		// Hacky fix but it honestly works and covers most obvious cases
 		flags := make([]string, 0, 8)
 		flags = append(flags, strings[1])
 		flags = append(flags, strings[2])
 		flags = append(flags, strings[3])
-		flags = append(flags, first_date)
-		flags = append(flags, strings[7])
-		flags = append(flags, second_date)
-		flags = append(flags, strings[11])
-		flags = append(flags, strings[12])
+		flags = append(flags, os.Args[2])
+		flags = append(flags, "--until")
+		flags = append(flags, os.Args[3])
+		flags = append(flags, "--format=COMMIT,%ae,%an")
+		flags = append(flags, "--numstat")
 		cmd := exec.Command(strings[0], flags...)
 		output, err := cmd.Output()
 		if err != nil {
