@@ -201,7 +201,6 @@ func Usage() error {
 		return err
 	}
 	_, err = fmt.Println("-Directory containing repository")
-
 	if err != nil {
 		logger.Printf("Usage (Println 2): %s", err.Error())
 		return err
