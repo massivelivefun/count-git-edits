@@ -70,7 +70,9 @@ func ListBranches(
 		if submatch == nil {
 			continue
 		}
-		lines = append(lines, submatch[1])
+		if len(submatch) > 1 {
+			lines = append(lines, submatch[1])
+		}
 	}
 	return lines, nil
 }
