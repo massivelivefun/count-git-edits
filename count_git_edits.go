@@ -67,9 +67,6 @@ func ListBranches(
 	lines := []string{}
 	for _, line := range new_output {
 		submatch := regex.FindStringSubmatch(line)
-		if submatch == nil {
-			continue
-		}
 		if len(submatch) > 1 {
 			lines = append(lines, submatch[1])
 		}
