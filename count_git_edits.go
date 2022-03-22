@@ -69,8 +69,11 @@ func RunCommand(
 	}
 }
 
-func ListBranches(directory string) ([]string, error) {
-	output, err := RunCommand("git ls-remote --heads origin")
+func ListBranches(
+	directory string,
+) ([]string, error) {
+	// output, err := RunCommand("git ls-remote --heads origin")
+	output, err := RunCommand("git ls-remote --heads .")
 	if err != nil {
 		logger.Printf("ListBranches (CommandWithDirectory): %s", err.Error())
 		return nil, err
