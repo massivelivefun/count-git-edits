@@ -38,10 +38,6 @@ func CommandWithDirectory(
 	if strings[1] == "log" {
 		// Can't really build the arguments and assume that its always dates
 		// Especially when the date could be something like "Today"
-		// first_date := fmt.Sprintf("%s %s %s",
-		// 	strings[4], strings[5], strings[6])
-		// second_date := fmt.Sprintf("%s %s %s",
-		// 	strings[8], strings[9], strings[10])
 		// Hacky fix but it honestly works and covers most obvious cases
 		flags := make([]string, 0, 8)
 		flags = append(flags, strings[1])
