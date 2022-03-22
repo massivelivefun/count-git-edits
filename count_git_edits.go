@@ -22,8 +22,7 @@ func ChangeToDirectory(directory string) error {
 	return nil
 }
 
-func CommandWithDirectory(
-	directory string,
+func RunCommand(
 	command string,
 ) (string, error) {
 	// Command parameter is split on spaces
@@ -71,8 +70,7 @@ func CommandWithDirectory(
 }
 
 func ListBranches(directory string) ([]string, error) {
-	output, err := CommandWithDirectory(directory,
-		"git ls-remote --heads origin")
+	output, err := RunCommand("git ls-remote --heads origin")
 	if err != nil {
 		logger.Printf("ListBranches (CommandWithDirectory): %s", err.Error())
 		return nil, err
@@ -102,8 +100,7 @@ func ContributorCountBranch(
 	end_time string,
 	student_counts map[string]int,
 ) error {
-	_, err := CommandWithDirectory(directory, fmt.Sprintf("git checkout %s",
-		branch))
+	_, err := RunCommand(fmt.Sprintf("git checkout %s", branch))
 	if err != nil {
 		logger.Printf("ContributorCountBranch (CommandWithDirectory 1): %s",
 			err.Error())
@@ -114,7 +111,7 @@ func ContributorCountBranch(
 	command := fmt.Sprintf("git log %s --since '%s' --until '%s'",
 		branch, start_time, end_time)
 	command += " --format=COMMIT,%ae,%an --numstat"
-	output, err := CommandWithDirectory(directory, command)
+	output, err := RunCommand(command)
 	if err != nil {
 		logger.Printf("ContributorCountBranch (CommandWithDirectory 2): %s",
 			err.Error())
@@ -178,7 +175,7 @@ func CountEdits(
 	start_time string,
 	end_time string,
 ) (map[string]int, error) {
-	_, err := CommandWithDirectory(directory, "git pull")
+	_, err := RunCommand("git pull")
 	if err != nil {
 		logger.Printf("CountEdits (CommandWithDirectory): %s", err.Error())
 		return nil, err
