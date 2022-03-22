@@ -13,16 +13,19 @@ import (
 	"golang.org/x/exp/constraints"
 )
 
+func ChangeToDirectory(directory string) error {
+	err := os.Chdir(directory)
+	if err != nil {
+		logger.Printf("CommandWithDirectory (Chdir): %s", err.Error())
+		return err
+	}
+	return nil
+}
+
 func CommandWithDirectory(
 	directory string,
 	command string,
 ) (string, error) {
-	err := os.Chdir(directory)
-	if err != nil {
-		logger.Printf("CommandWithDirectory (Chdir):%s", err.Error())
-		return "", err
-	}
-
 	// Command parameter is split on spaces
 	strings := strings.Fields(command)
 	if len(strings) <= 1 {
@@ -270,6 +273,11 @@ func main() {
 			os.Exit(1)
 		}
 	} else {
+		err := ChangeToDirectory(os.Args[1])
+		if err != nil {
+			logger.Printf("main (ChangeToDirectory): %s", err.Error())
+			os.Exit(1)
+		}
 		counts_map, err := CountEdits(os.Args[1], os.Args[2], os.Args[3])
 		if err != nil {
 			logger.Printf("main (CountEdits): %s", err.Error())
