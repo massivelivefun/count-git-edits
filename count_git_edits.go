@@ -284,8 +284,13 @@ func main() {
 			os.Exit(1)
 		}
 		slice_of_students_edits := StringSliceOfMapsKeysAndValues(counts_map)
-		for _, student_edits := range slice_of_students_edits {
-			fmt.Println(student_edits)
+		for idx, student_edits := range slice_of_students_edits {
+			_, err := fmt.Println(student_edits)
+			if err != nil {
+				logger.Printf("main (StringSliceOfMapsKeysAndValues): %d, %s",
+					idx, err.Error())
+				os.Exit(1)
+			}
 		}
 	}
 }
