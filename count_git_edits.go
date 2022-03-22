@@ -60,6 +60,10 @@ func CommandWithDirectory(
 		}
 		return string(output), nil
 	} else {
+		// git checkout bugs out if there is more than one remote that have the
+		// same branches (they probably will) so it needs to be locally tracked
+		// if the remote branches that were pulled are not checked out then
+		// that when we run into problems
 		cmd := exec.Command(strings[0], strings[1:]...)
 		output, err := cmd.Output()
 		if err != nil {
