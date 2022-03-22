@@ -9,6 +9,7 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/google/shlex"
 	"github.com/peterrk/slices"
 	"golang.org/x/exp/constraints"
 )
@@ -25,48 +26,27 @@ func ChangeToDirectory(directory string) error {
 func RunCommand(
 	command string,
 ) (string, error) {
-	// Command parameter is split on spaces
-	strings := strings.Fields(command)
-	if len(strings) <= 1 {
-		err := fmt.Errorf("Command parameter needs arguments passed with it.")
-		logger.Printf("CommandWithDirectory (Fields): %s", err.Error())
+	strings, err := shlex.Split(command)
+	if err != nil {
+		logger.Printf("CommandWithDirectory (shlex.Split 1): %s", err.Error())
 		return "", err
 	}
-
-	// This whole conditional needs to be cleaned up
-	if strings[1] == "log" {
-		// Can't really build the arguments and assume that its always dates
-		// Especially when the date could be something like "Today"
-		// Hacky fix but it honestly works and covers most obvious cases
-		flags := make([]string, 0, 8)
-		flags = append(flags, strings[1])
-		flags = append(flags, strings[2])
-		flags = append(flags, strings[3])
-		flags = append(flags, os.Args[2])
-		flags = append(flags, "--until")
-		flags = append(flags, os.Args[3])
-		flags = append(flags, "--format=COMMIT,%ae,%an")
-		flags = append(flags, "--numstat")
-		cmd := exec.Command(strings[0], flags...)
-		output, err := cmd.Output()
-		if err != nil {
-			logger.Printf("CommandWithDirectory (Output 1): %s", err.Error())
-			return "", err
-		}
-		return string(output), nil
-	} else {
-		// git checkout bugs out if there is more than one remote that have the
-		// same branches (they probably will) so it needs to be locally tracked
-		// if the remote branches that were pulled are not checked out then
-		// that when we run into problems
-		cmd := exec.Command(strings[0], strings[1:]...)
-		output, err := cmd.Output()
-		if err != nil {
-			logger.Printf("CommandWithDirectory (Output 2): %s", err.Error())
-			return "", err
-		}
-		return string(output), nil
+	if len(strings) <= 1 {
+		err := fmt.Errorf("Command parameter needs arguments passed with it.")
+		logger.Printf("CommandWithDirectory (shlex.Split 2): %s", err.Error())
+		return "", err
 	}
+	// git checkout bugs out if there is more than one remote that have the
+	// same branches (they probably will) so it needs to be locally tracked
+	// if the remote branches that were pulled are not checked out then
+	// that when we run into problems
+	cmd := exec.Command(strings[0], strings[1:]...)
+	output, err := cmd.Output()
+	if err != nil {
+		logger.Printf("CommandWithDirectory (Output): %s", err.Error())
+		return "", err
+	}
+	return string(output), nil
 }
 
 func ListBranches(
