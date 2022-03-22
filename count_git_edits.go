@@ -252,12 +252,13 @@ func main() {
 			os.Exit(1)
 		}
 	} else {
-		err := ChangeToDirectory(os.Args[1])
+		repository, startTime, endTime := os.Args[1], os.Args[2], os.Args[3]
+		err := ChangeToDirectory(repository)
 		if err != nil {
 			logger.Printf("main (ChangeToDirectory): %s", err.Error())
 			os.Exit(1)
 		}
-		counts_map, err := CountEdits(os.Args[1], os.Args[2], os.Args[3])
+		counts_map, err := CountEdits(repository, startTime, endTime)
 		if err != nil {
 			logger.Printf("main (CountEdits): %s", err.Error())
 			os.Exit(1)
