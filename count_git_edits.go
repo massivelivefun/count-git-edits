@@ -26,12 +26,12 @@ func ChangeToDirectory(directory string) error {
 func RunCommand(
 	command string,
 ) (string, error) {
-	strings, err := shlex.Split(command)
+	parsedCommand, err := shlex.Split(command)
 	if err != nil {
 		logger.Printf("CommandWithDirectory (shlex.Split 1): %s", err.Error())
 		return "", err
 	}
-	if len(strings) <= 1 {
+	if len(parsedCommand) <= 1 {
 		err := fmt.Errorf("Command parameter needs arguments passed with it.")
 		logger.Printf("CommandWithDirectory (shlex.Split 2): %s", err.Error())
 		return "", err
@@ -40,7 +40,7 @@ func RunCommand(
 	// same branches (they probably will be) so those branches need to be
 	// locally tracked. if the remote branches that were pulled are not
 	// checked out then that when we run into problems
-	cmd := exec.Command(strings[0], strings[1:]...)
+	cmd := exec.Command(parsedCommand[0], parsedCommand[1:]...)
 	output, err := cmd.Output()
 	if err != nil {
 		logger.Printf("CommandWithDirectory (Output): %s", err.Error())
@@ -63,9 +63,9 @@ func ListBranches(
 		logger.Printf("ListBranches (Compile): %s", err.Error())
 		return nil, err
 	}
-	new_output := SplitNewLinePlatformPortable(output)
+	newOutput := SplitNewLinePlatformPortable(output)
 	lines := []string{}
-	for _, line := range new_output {
+	for _, line := range newOutput {
 		submatch := regex.FindStringSubmatch(line)
 		if len(submatch) > 1 {
 			lines = append(lines, submatch[1])
@@ -78,9 +78,9 @@ func ListBranches(
 func ContributorCountBranch(
 	directory string,
 	branch string,
-	start_time string,
-	end_time string,
-	student_counts map[string]int,
+	startTime string,
+	endTime string,
+	studentCounts map[string]int,
 ) error {
 	_, err := RunCommand(fmt.Sprintf("git checkout %s", branch))
 	if err != nil {
@@ -91,7 +91,7 @@ func ContributorCountBranch(
 
 	author := ""
 	command := fmt.Sprintf("git log %s --since '%s' --until '%s'",
-		branch, start_time, end_time)
+		branch, startTime, endTime)
 	command += " --format=COMMIT,%ae,%an --numstat"
 	output, err := RunCommand(command)
 	if err != nil {
@@ -100,40 +100,40 @@ func ContributorCountBranch(
 		return err
 	}
 
-	new_output := SplitNewLinePlatformPortable(output)
+	newOutput := SplitNewLinePlatformPortable(output)
 
 	// TO-DO: Remove lines from log command that became null strings so we
 	// don't iterate through them
 
-	first_regex, err := regexp.Compile("^COMMIT,([^,]*),([^,]*)*$")
+	firstRegex, err := regexp.Compile("^COMMIT,([^,]*),([^,]*)*$")
 	if err != nil {
 		logger.Printf("ContributorCountBranch (Compile 1): %s", err.Error())
 		return err
 	}
 
-	second_regex, err := regexp.Compile("^\\s*(\\d+)\\s*(\\d+).*$")
+	secondRegex, err := regexp.Compile("^\\s*(\\d+)\\s*(\\d+).*$")
 	if err != nil {
 		logger.Printf("ContributorCountBranch (Compile 2): %s", err.Error())
 		return err
 	}
 
-	for _, line := range new_output {
-		new_line := strings.TrimSuffix(line, "\n")
+	for _, line := range newOutput {
+		newLine := strings.TrimSuffix(line, "\n")
 
-		first_group_matches := first_regex.FindStringSubmatch(new_line)
-		second_group_matches := second_regex.FindStringSubmatch(new_line)
+		firstGroupMatches := firstRegex.FindStringSubmatch(newLine)
+		secondGroupMatches := secondRegex.FindStringSubmatch(newLine)
 
-		if first_regex.MatchString(new_line) && len(first_group_matches) > 2 {
-			author = fmt.Sprintf("%s; %s", first_group_matches[1],
-				first_group_matches[2])
-		} else if second_regex.MatchString(new_line) && len(second_group_matches) > 2 {
-			added, err := strconv.Atoi(second_group_matches[1])
+		if firstRegex.MatchString(newLine) && len(firstGroupMatches) > 2 {
+			author = fmt.Sprintf("%s; %s", firstGroupMatches[1],
+				firstGroupMatches[2])
+		} else if secondRegex.MatchString(newLine) && len(secondGroupMatches) > 2 {
+			added, err := strconv.Atoi(secondGroupMatches[1])
 			if err != nil {
 				logger.Printf("ContributorCountBranch (Atoi 1): %s",
 					err.Error())
 				return err
 			}
-			deleted, err := strconv.Atoi(second_group_matches[2])
+			deleted, err := strconv.Atoi(secondGroupMatches[2])
 			if err != nil {
 				logger.Printf("ContributorCountBranch (Atoi 2): %s",
 					err.Error())
@@ -142,10 +142,10 @@ func ContributorCountBranch(
 			if author == "" {
 				return fmt.Errorf("Author not defined for line: %s", line)
 			}
-			if val, ok := student_counts[author]; ok {
-				student_counts[author] = val + added + deleted
+			if val, ok := studentCounts[author]; ok {
+				studentCounts[author] = val + added + deleted
 			} else {
-				student_counts[author] = 0
+				studentCounts[author] = 0
 			}
 		}
 	}
@@ -154,8 +154,8 @@ func ContributorCountBranch(
 
 func CountEdits(
 	directory string,
-	start_time string,
-	end_time string,
+	startTime string,
+	endTime string,
 ) (map[string]int, error) {
 	_, err := RunCommand("git pull")
 	if err != nil {
@@ -167,17 +167,17 @@ func CountEdits(
 		logger.Printf("CountEdits (ListBranches): %s", err.Error())
 		return nil, err
 	}
-	student_counts := make(map[string]int)
+	studentCounts := make(map[string]int)
 	for idx, branch := range branches {
-		err := ContributorCountBranch(directory, branch, start_time, end_time,
-			student_counts)
+		err := ContributorCountBranch(directory, branch, startTime, endTime,
+			studentCounts)
 		if err != nil {
 			logger.Printf(
 				"CountEdits (ContributorCountBranch) %d: %s", idx, err.Error())
 			return nil, err
 		}
 	}
-	return student_counts, nil
+	return studentCounts, nil
 }
 
 func Usage() error {
@@ -204,7 +204,7 @@ func Usage() error {
 		logger.Printf("Usage (Println 4): %s", err.Error())
 		return err
 	}
-	return nil
+	return err
 }
 
 // Replace this with the map[string]int key asap because students can have
@@ -219,23 +219,23 @@ func SplitNewLinePlatformPortable(str string) []string {
 }
 
 func SortedKeysOfMapWithStringKeys[K constraints.Ordered, V any](
-	the_map map[K]V,
+	hashmap map[K]V,
 ) []K {
-	sorted_keys := make([]K, 0, len(the_map))
-	for key := range the_map {
-		sorted_keys = append(sorted_keys, key)
+	sortedKeys := make([]K, 0, len(hashmap))
+	for key := range hashmap {
+		sortedKeys = append(sortedKeys, key)
 	}
-	slices.Sort(sorted_keys)
-	return sorted_keys
+	slices.Sort(sortedKeys)
+	return sortedKeys
 }
 
 func StringSliceOfMapsKeysAndValues[K constraints.Ordered, V any](
-	the_map map[K]V,
+	hashmap map[K]V,
 ) []string {
-	sorted_keys := SortedKeysOfMapWithStringKeys(the_map)
-	slice := make([]string, 0, len(the_map))
-	for _, key := range sorted_keys {
-		edits := the_map[key]
+	sortedKeys := SortedKeysOfMapWithStringKeys(hashmap)
+	slice := make([]string, 0, len(hashmap))
+	for _, key := range sortedKeys {
+		edits := hashmap[key]
 		line := fmt.Sprintf("%v: %v", key, edits)
 		slice = append(slice, line)
 	}
@@ -258,14 +258,14 @@ func main() {
 			logger.Printf("main (ChangeToDirectory): %s", err.Error())
 			os.Exit(1)
 		}
-		counts_map, err := CountEdits(repository, startTime, endTime)
+		studentCountsMap, err := CountEdits(repository, startTime, endTime)
 		if err != nil {
 			logger.Printf("main (CountEdits): %s", err.Error())
 			os.Exit(1)
 		}
-		slice_of_students_edits := StringSliceOfMapsKeysAndValues(counts_map)
-		for idx, student_edits := range slice_of_students_edits {
-			_, err := fmt.Println(student_edits)
+		sliceOfStudentEdits := StringSliceOfMapsKeysAndValues(studentCountsMap)
+		for idx, studentEdits := range sliceOfStudentEdits {
+			_, err := fmt.Println(studentEdits)
 			if err != nil {
 				logger.Printf("main (StringSliceOfMapsKeysAndValues): %d, %s",
 					idx, err.Error())
