@@ -6,10 +6,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
 
-## [0.0.1] - 2022-03-25
+## [0.1.0] - 2022-03-28
 
 ### Added
 - Bootstrap the initial release of count-git-edits
 
-[Unreleased]: https://github.com/massivelivefun/count-git-edits/compare/v0.0.1...HEAD
-[0.0.1]: https://github.com/massivelivefun/count-git-edits/releases/tag/v0.0.1
+[Unreleased]: https://github.com/massivelivefun/count-git-edits/compare/0.1.0...HEAD
+[0.1.0]: https://github.com/massivelivefun/count-git-edits/releases/tag/0.1.0
